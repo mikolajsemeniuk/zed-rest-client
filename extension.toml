@@ -2,7 +2,7 @@ id = "rest-client"
 name = "REST Client"
 version = "0.0.1"
 schema_version = 1
-authors = ["Mikolaj Semeniuk <[email protected]>"]
+authors = ["Mikolaj Semeniuk <m.semeniuk@icloud.com>"]
 description = "REST Client for .http/.rest files - highlight syntax and send HTTP requests directly from your editor"
 repository = "https://github.com/mikolajsemeniuk/zed-rest-client"
 
