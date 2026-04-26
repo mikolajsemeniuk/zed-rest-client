@@ -1,0 +1,5 @@
+name = "HTTP"
+grammar = "http"
+path_suffixes = ["http", "rest"]
+line_comments = ["# ", "// "]
+autoclose_before = ";:.,=}])>"

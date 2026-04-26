@@ -1,0 +1,15 @@
+id = "rest-client"
+name = "REST Client"
+version = "0.0.1"
+schema_version = 1
+authors = ["Mikolaj Semeniuk <[email protected]>"]
+description = "REST Client for .http/.rest files - highlight syntax and send HTTP requests directly from your editor"
+repository = "https://github.com/mikolajsemeniuk/zed-rest-client"
+
+[language_servers.http-lsp]
+name = "REST Client LSP"
+languages = ["HTTP"]
+
+[grammars.http]
+repository = "https://github.com/rest-nvim/tree-sitter-http"
+commit = "db8b4398de90b6d0b6c780aba96aaa2cd8e9202c"

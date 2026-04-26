@@ -1,0 +1,13 @@
+[package]
+name = "zed-rest-client"
+version = "0.0.1"
+edition = "2021"
+description = "REST Client extension for Zed - highlight syntax and send HTTP requests from .http/.rest files"
+license = "Apache-2.0"
+repository = "https://github.com/mikolajsemeniuk/zed-rest-client"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+zed_extension_api = "0.7.0"
