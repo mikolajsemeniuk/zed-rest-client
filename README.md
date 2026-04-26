@@ -100,7 +100,7 @@ Click **▶ Send Request** above any request line. The response opens in a new t
 
 ```http
 @host = https://httpbin.org
-@user = mikolaj
+@user = user
 @token = your-bearer-token-here
 
 ### Simple GET request
