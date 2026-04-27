@@ -1,8 +1,11 @@
 use std::fs;
-use zed_extension_api::{self as zed, Command, LanguageServerId, Result, Worktree};
+use zed_extension_api::{
+    self as zed, Command, LanguageServerId, Result, Worktree, settings::LspSettings,
+};
 
 const LSP_REPO: &str = "mikolajsemeniuk/zed-rest-client-lsp";
 const BINARY_NAME: &str = "zed-rest-client-lsp";
+const SERVER_NAME: &str = "http-lsp";
 
 struct RestClientExtension {
     cached_binary_path: Option<String>,
@@ -18,14 +21,30 @@ impl zed::Extension for RestClientExtension {
     fn language_server_command(
         &mut self,
         language_server_id: &LanguageServerId,
-        _worktree: &Worktree,
+        worktree: &Worktree,
     ) -> Result<Command> {
-        let binary_path = self.language_server_binary_path(language_server_id)?;
-        Ok(Command {
-            command: binary_path,
-            args: vec![],
-            env: vec![],
-        })
+        let binary_settings = LspSettings::for_worktree(SERVER_NAME, worktree)
+            .ok()
+            .and_then(|s| s.binary);
+
+        let configured_path = binary_settings.as_ref().and_then(|b| b.path.clone());
+        let args = binary_settings
+            .as_ref()
+            .and_then(|b| b.arguments.clone())
+            .unwrap_or_default();
+        let env = binary_settings
+            .as_ref()
+            .and_then(|b| b.env.clone())
+            .map(|m| m.into_iter().collect::<Vec<_>>())
+            .unwrap_or_default();
+
+        let command = self.language_server_binary_path(
+            language_server_id,
+            worktree,
+            configured_path.as_deref(),
+        )?;
+
+        Ok(Command { command, args, env })
     }
 }
 
@@ -33,11 +52,27 @@ impl RestClientExtension {
     fn language_server_binary_path(
         &mut self,
         language_server_id: &LanguageServerId,
+        worktree: &Worktree,
+        configured_path: Option<&str>,
     ) -> Result<String> {
+        if let Some(path) = configured_path {
+            if fs::metadata(path).map_or(false, |m| m.is_file()) {
+                return Ok(path.to_string());
+            }
+            return Err(format!(
+                "configured LSP binary not found at '{path}' (lsp.{SERVER_NAME}.binary.path)"
+            ));
+        }
+
         if let Some(path) = &self.cached_binary_path {
             if fs::metadata(path).map_or(false, |m| m.is_file()) {
                 return Ok(path.clone());
             }
+        }
+
+        if let Some(path) = worktree.which(BINARY_NAME) {
+            self.cached_binary_path = Some(path.clone());
+            return Ok(path);
         }
 
         zed::set_language_server_installation_status(
