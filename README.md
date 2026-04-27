@@ -57,6 +57,8 @@ If you skip this step, requests will be sent successfully but the response will 
 
 That's it. On first use, the extension downloads the LSP server binary for your platform from [GitHub Releases](https://github.com/mikolajsemeniuk/zed-rest-client-lsp/releases) (~5 MB, one-time download).
 
+> Behind a corporate firewall and the download fails (e.g. `403: Forbidden`)? See [Using a pre-installed binary](#using-a-pre-installed-binary).
+
 ## Installation (zed dev extension)
 
 If you want to install the extension from source for testing local changes or contributing, clone this repo and install it as a dev extension:
@@ -185,9 +187,51 @@ This extension supports the most commonly used features of the VS Code REST Clie
 - Cookie jar
 - External body files (`< ./body.json`)
 
+## Using a pre-installed binary
+
+By default the extension downloads the LSP server from GitHub Releases on first use. If that download is blocked (corporate firewalls often deny `objects.githubusercontent.com`, surfacing as `403: Forbidden`), or you simply want to manage the binary yourself, you can supply it manually.
+
+The extension resolves the LSP binary in this order, following the same convention as `rust-analyzer`, `gleam`, and other Zed extensions:
+
+1. `lsp.http-lsp.binary.path` in your Zed `settings.json`
+2. A previously downloaded copy in the extension's cache
+3. `zed-rest-client-lsp` (or `zed-rest-client-lsp.exe` on Windows) on your `PATH`
+4. Download from [GitHub Releases](https://github.com/mikolajsemeniuk/zed-rest-client-lsp/releases)
+
+### Option A — put the binary on your `PATH`
+
+1. Download the archive for your platform from the [releases page](https://github.com/mikolajsemeniuk/zed-rest-client-lsp/releases). Asset names:
+   - macOS Apple Silicon: `zed-rest-client-lsp-aarch64-apple-darwin.tar.gz`
+   - macOS Intel: `zed-rest-client-lsp-x86_64-apple-darwin.tar.gz`
+   - Linux x86_64: `zed-rest-client-lsp-x86_64-unknown-linux-gnu.tar.gz`
+   - Windows x86_64: `zed-rest-client-lsp-x86_64-pc-windows-msvc.zip`
+2. Extract it and place `zed-rest-client-lsp` (or `zed-rest-client-lsp.exe`) into a directory on your `PATH` (e.g. `~/.local/bin`, `/usr/local/bin`, or `%USERPROFILE%\bin`).
+3. On macOS / Linux, mark it executable: `chmod +x zed-rest-client-lsp`.
+4. Restart Zed.
+
+### Option B — point Zed at an explicit path
+
+Open your Zed `settings.json` (`cmd+,`) and add:
+
+```json
+{
+  "lsp": {
+    "http-lsp": {
+      "binary": {
+        "path": "/absolute/path/to/zed-rest-client-lsp"
+      }
+    }
+  }
+}
+```
+
+On Windows, use a forward-slash or escaped-backslash path, e.g. `"C:/Tools/zed-rest-client-lsp.exe"`.
+
+You can also pass extra `arguments` and `env` under `binary` if needed; both are forwarded to the language server process.
+
 ## Architecture
 
-This extension is a thin WASM wrapper around a native LSP server written in Rust ([zed-rest-client-lsp](https://github.com/mikolajsemeniuk/zed-rest-client-lsp)). The LSP binary is downloaded automatically on first use from GitHub Releases.
+This extension is a thin WASM wrapper around a native LSP server written in Rust ([zed-rest-client-lsp](https://github.com/mikolajsemeniuk/zed-rest-client-lsp)). The LSP binary is downloaded automatically on first use from GitHub Releases, with fallbacks for users who need to supply it manually — see [Using a pre-installed binary](#using-a-pre-installed-binary).
 
 ## Issues / Contributing
 
